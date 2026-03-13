@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Add Project{% endblock %}
+
+{% block content %}
+
+<h1 class="text-3xl font-bold mb-6">
+Add Project
+</h1>
+
+<form action="/add-project/" method="POST" class="space-y-4 max-w-md">
+
+{% csrf_token %}
+
+<input
+type="text"
+name="website_url"
+placeholder="Enter Domain Name (example.com)"
+required
+class="w-full border px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+/>
+
+<button
+type="submit"
+class="bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700 transition">
+
+Start Analysis
+
+</button>
+
+</form>
+
+{% endblock %}

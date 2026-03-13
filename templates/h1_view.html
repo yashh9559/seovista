@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>H1 Screenshots</title>
+
+<style>
+
+body{
+font-family: Arial, sans-serif;
+margin: 0;
+padding: 0;
+}
+
+/* PAGE CONTAINER */
+
+.container{
+padding: 80px 40px;
+}
+
+/* FLOATING DASHBOARD BUTTON */
+
+.dashboard-btn{
+
+position: fixed;
+top: 20px;
+left: 20px;
+
+background-color: #2c7be5;
+color: white;
+
+padding: 10px 16px;
+text-decoration: none;
+
+border-radius: 6px;
+font-weight: bold;
+
+box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+
+z-index: 999;
+
+}
+
+.dashboard-btn:hover{
+background-color: #1a5edb;
+}
+
+/* SCREENSHOT CARD */
+
+.screenshot-box{
+
+margin-bottom: 60px;
+
+padding: 20px;
+
+border: 1px solid #ddd;
+
+border-radius: 8px;
+
+box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+
+}
+
+.screenshot-box img{
+
+width: 100%;
+max-width: 1000px;
+
+border-radius: 6px;
+
+margin-top: 10px;
+
+}
+
+.url-title{
+font-weight: bold;
+font-size: 16px;
+color: #333;
+}
+
+</style>
+
+</head>
+
+<body>
+
+
+<!-- FLOATING DASHBOARD BUTTON -->
+
+<a class="dashboard-btn" href="/dashboard/">⬅ Back to Dashboard</a>
+
+
+<div class="container">
+
+<h2>H1 Screenshots</h2>
+
+{% if screenshots %}
+
+{% for shot in screenshots %}
+
+<div class="screenshot-box">
+
+<div class="url-title">
+
+{{ shot.url }}
+
+</div>
+
+<img src="data:image/png;base64,{{ shot.image }}">
+
+</div>
+
+{% endfor %}
+
+{% else %}
+
+<p>No screenshots available.</p>
+
+{% endif %}
+
+</div>
+
+</body>
+</html>

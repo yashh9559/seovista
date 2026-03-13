@@ -1,0 +1,268 @@
+{% extends 'base.html' %}
+
+{% block title %}Report History{% endblock %}
+
+{% block content %}
+
+<div class="flex justify-between items-center mb-8">
+
+<h2 class="text-3xl font-bold">
+Report History for {{ project.website_url }}
+</h2>
+
+<a href="{% url 'dashboard' %}"
+class="bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-800">
+
+⬅ Back to Dashboard
+
+</a>
+
+</div>
+
+
+{% if reports %}
+
+<div class="bg-white shadow rounded-lg overflow-hidden">
+
+<table class="w-full text-center">
+
+<thead class="bg-gray-100">
+
+<tr>
+<th class="p-4">Date</th>
+<th class="p-4">SEO Score</th>
+<th class="p-4">H1 Count</th>
+<th class="p-4">Missing ALT</th>
+<th class="p-4">Details</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for report in reports %}
+
+<tr class="border-t hover:bg-gray-50">
+
+<td class="p-4">
+{{ report.analyzed_at }}
+</td>
+
+<td class="p-4">
+
+<div class="w-full bg-gray-200 rounded h-6 overflow-hidden">
+
+<div
+class="h-6 text-xs font-bold text-white text-center leading-6
+{% if report.score >= 80 %}
+bg-green-600
+{% elif report.score >= 50 %}
+bg-yellow-500 text-black
+{% else %}
+bg-red-500
+{% endif %}"
+style="width: {{ report.score }}%;">
+
+{{ report.score }}/100
+
+</div>
+
+</div>
+
+</td>
+
+<td class="p-4">
+{{ report.h1_count }}
+</td>
+
+<td class="p-4 text-red-500">
+{{ report.missing_alt_count }}
+</td>
+
+<td class="p-4">
+
+<button
+onclick="toggleDetails('{{ report.id }}')"
+class="text-blue-600 hover:underline text-sm">
+
+View Details
+
+</button>
+
+</td>
+
+</tr>
+
+
+<tr id="details-{{ report.id }}" class="hidden bg-gray-50 border-t">
+
+<td colspan="5" class="p-6 text-left">
+
+<h3 class="font-semibold mb-3">
+Site Structure
+</h3>
+
+{% if report.crawl_map %}
+
+<div id="network{{ report.id }}" style="height:400px;border:1px solid #ddd;"></div>
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function(){
+
+let pages = [
+{% for page in report.crawl_map.splitlines %}
+"{{ page|escapejs }}",
+{% endfor %}
+]
+
+let nodes = []
+let edges = []
+
+nodes.push({
+    id:0,
+    label:"Home",
+    color:"#2563eb",
+    font:{color:"white"}
+})
+
+pages.forEach((page,i)=>{
+
+let label = page
+.replace("{{ project.website_url|escapejs }}","")
+.replace(/https?:\/\//,"")
+.replace(/\//g,"")
+.trim()
+
+if(label === ""){
+label = "page"+(i+1)
+}
+
+nodes.push({
+id:i+1,
+label:label,
+shape:"box"
+})
+
+edges.push({
+from:0,
+to:i+1,
+arrows:"to"
+})
+
+})
+
+let container = document.getElementById("network{{ report.id }}")
+
+let data = {
+nodes:new vis.DataSet(nodes),
+edges:new vis.DataSet(edges)
+}
+
+let options = {
+
+layout:{
+hierarchical:{
+direction:"UD",
+sortMethod:"directed"
+}
+},
+
+nodes:{
+shape:"box",
+font:{
+size:14
+}
+},
+
+edges:{
+smooth:true
+},
+
+physics:false
+
+}
+
+new vis.Network(container,data,options)
+
+})
+
+</script>
+
+{% else %}
+
+<p class="text-gray-500">
+No crawl data available.
+</p>
+
+{% endif %}
+
+
+<h3 class="font-semibold mt-6 mb-2">
+SEO Issues Found
+</h3>
+
+{% if report.issues %}
+
+<div class="bg-white border rounded p-4 max-h-48 overflow-y-auto">
+
+<ul class="text-sm space-y-1">
+
+{% for issue in report.issues.splitlines %}
+
+<li class="text-red-600">
+⚠ {{ issue }}
+</li>
+
+{% endfor %}
+
+</ul>
+
+</div>
+
+{% else %}
+
+<p class="text-green-600 font-semibold">
+✅ No major SEO issues detected
+</p>
+
+{% endif %}
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+{% else %}
+
+<div class="bg-white p-6 shadow rounded-lg">
+
+<p class="text-gray-600">
+No reports yet.
+</p>
+
+</div>
+
+{% endif %}
+
+
+<script>
+
+function toggleDetails(reportId){
+
+let row = document.getElementById("details-"+reportId)
+
+row.classList.toggle("hidden")
+
+}
+
+</script>
+
+{% endblock %}

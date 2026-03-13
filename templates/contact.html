@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1 class="text-3xl font-bold mb-8">
+Contact SEOVista
+</h1>
+
+<div class="grid md:grid-cols-2 gap-10">
+
+<!-- CONTACT INFO -->
+
+<div class="bg-white p-6 shadow rounded-lg">
+
+<h2 class="text-xl font-semibold mb-4">
+Developer Information
+</h2>
+
+<p class="mb-3">
+<span class="font-semibold">Name:</span> Yash Sawant
+</p>
+
+<p class="mb-3">
+<span class="font-semibold">Email:</span> 
+<a href="mailto:sawantyash9559@gmail.com" class="text-blue-600 hover:underline">
+sawantyash9559@gmail.com
+</a>
+</p>
+
+<p class="mb-3">
+<span class="font-semibold">LinkedIn:</span>
+<a href="https://www.linkedin.com/in/yash-sawant-9559ys/" 
+class="text-blue-600 hover:underline" target="_blank">
+linkedin.com/in/yash-sawant-9559ys
+</a>
+</p>
+
+<p class="mb-3">
+<span class="font-semibold">GitHub:</span>
+<a href="https://github.com/yashh9559" 
+class="text-blue-600 hover:underline" target="_blank">
+github.com/yashh9559
+</a>
+</p>
+
+</div>
+
+
+<!-- CONTACT FORM -->
+
+<div class="bg-white p-6 shadow rounded-lg">
+
+<h2 class="text-xl font-semibold mb-4">
+Send a Message
+</h2>
+
+<form class="space-y-4">
+
+<input
+type="text"
+name="name"
+placeholder="Your Name"
+class="w-full border px-4 py-3 rounded"
+/>
+
+<input
+type="email"
+name="email"
+placeholder="Your Email"
+class="w-full border px-4 py-3 rounded"
+/>
+
+<textarea
+name="message"
+placeholder="Your Message"
+class="w-full border px-4 py-3 rounded"></textarea>
+
+<button
+type="submit"
+class="bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700">
+
+Send Message
+
+</button>
+
+</form>
+
+</div>
+
+</div>
+
+{% endblock %}

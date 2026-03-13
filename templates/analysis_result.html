@@ -1,0 +1,281 @@
+{% extends 'base.html' %}
+
+{% block title %}SEO Analysis{% endblock %}
+
+{% block content %}
+
+<div class="flex justify-between items-center mb-8">
+
+<h2 class="text-3xl font-bold">
+SEO Analysis for {{ project.website_url }}
+</h2>
+
+<a href="/dashboard/"
+class="bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-800">
+Back to Dashboard
+</a>
+
+</div>
+
+
+{% if status == "Running" %}
+
+<div class="bg-white p-6 shadow rounded-lg">
+
+<p class="text-lg font-semibold text-blue-600">
+Crawler Running...
+</p>
+
+<p class="text-gray-600 mt-2">
+The crawler is analyzing multiple pages. This may take a few seconds.
+</p>
+
+</div>
+
+{% elif status == "Completed" %}
+
+<!-- SEO SCORE CARD -->
+
+<div class="bg-white p-6 shadow rounded-lg mb-8 text-center">
+
+<p class="text-gray-600">SEO Score</p>
+
+<p class="text-5xl font-bold text-green-600 mt-2">
+{{ score }}/100
+</p>
+
+</div>
+
+
+<!-- SEO SCORE GAUGE -->
+
+<div class="bg-white shadow rounded-lg p-6 mb-8 text-center">
+
+<h3 class="text-xl font-semibold mb-4">
+SEO Score Overview
+</h3>
+
+<div class="max-w-xs mx-auto">
+<canvas id="seoScoreChart"></canvas>
+</div>
+
+</div>
+
+
+<!-- CRAWL SUMMARY -->
+
+<h3 class="text-xl font-semibold mb-4">
+Crawl Summary
+</h3>
+
+<div class="grid md:grid-cols-3 gap-6 mb-8">
+
+<div class="bg-white p-6 shadow rounded-lg text-center">
+
+<p class="text-gray-600">Pages Crawled</p>
+
+<p class="text-3xl font-bold">
+{{ pages_crawled }}
+</p>
+
+</div>
+
+
+<div class="bg-white p-6 shadow rounded-lg text-center">
+
+<p class="text-gray-600">Total H1 Tags</p>
+
+<p class="text-3xl font-bold">
+{{ total_h1 }}
+</p>
+
+</div>
+
+
+<div class="bg-white p-6 shadow rounded-lg text-center">
+
+<p class="text-gray-600">Images Missing ALT</p>
+
+<p class="text-3xl font-bold text-red-500">
+{{ total_missing_alt }}
+</p>
+
+</div>
+
+</div>
+
+
+<!-- INFRASTRUCTURE CHECKS -->
+
+<h3 class="text-xl font-semibold mb-4">
+Infrastructure Checks
+</h3>
+
+<div class="bg-white shadow rounded-lg p-6 space-y-3 mb-8">
+
+<p>
+<strong>robots.txt:</strong>
+
+{% if robots_txt_found %}
+<span class="text-green-600 font-semibold">✔ Found</span>
+{% else %}
+<span class="text-red-500 font-semibold">✖ Missing</span>
+{% endif %}
+
+</p>
+
+
+<p>
+<strong>sitemap.xml:</strong>
+
+{% if sitemap_found %}
+<span class="text-green-600 font-semibold">✔ Found</span>
+{% else %}
+<span class="text-red-500 font-semibold">✖ Missing</span>
+{% endif %}
+
+</p>
+
+
+<p>
+<strong>HSTS Header:</strong>
+
+{% if has_hsts %}
+<span class="text-green-600 font-semibold">✔ Present</span>
+{% else %}
+<span class="text-red-500 font-semibold">✖ Missing</span>
+{% endif %}
+
+</p>
+
+
+<p>
+<strong>Content Security Policy:</strong>
+
+{% if has_csp %}
+<span class="text-green-600 font-semibold">✔ Present</span>
+{% else %}
+<span class="text-red-500 font-semibold">✖ Missing</span>
+{% endif %}
+
+</p>
+
+
+<p>
+<strong>X-Frame-Options:</strong>
+
+{% if has_x_frame %}
+<span class="text-green-600 font-semibold">✔ Present</span>
+{% else %}
+<span class="text-red-500 font-semibold">✖ Missing</span>
+{% endif %}
+
+</p>
+
+</div>
+
+
+<!-- SEO ISSUES -->
+
+<h3 class="text-xl font-semibold mb-4">
+SEO Issues Detected
+</h3>
+
+<div class="bg-white shadow rounded-lg p-6">
+
+{% if issues %}
+
+<ul class="list-disc pl-6 space-y-2">
+
+{% for issue in issues %}
+
+<li class="text-red-600">
+{{ issue }}
+</li>
+
+{% endfor %}
+
+</ul>
+
+{% else %}
+
+<p class="text-green-600 font-semibold">
+No major SEO issues detected 🎉
+</p>
+
+{% endif %}
+
+</div>
+
+
+{% else %}
+
+<div class="bg-white p-6 shadow rounded-lg">
+
+<p class="text-red-500">
+Something went wrong during analysis.
+</p>
+
+</div>
+
+{% endif %}
+
+
+<!-- SEO SCORE CHART -->
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function(){
+
+const score = {{ score|default:0 }};
+
+const ctx = document.getElementById('seoScoreChart');
+
+if(ctx){
+
+new Chart(ctx, {
+
+type: 'doughnut',
+
+data: {
+
+labels: ['Score', 'Remaining'],
+
+datasets: [{
+
+data: [score, 100 - score],
+
+backgroundColor: [
+'#22c55e',
+'#e5e7eb'
+],
+
+borderWidth: 0
+
+}]
+
+},
+
+options: {
+
+cutout: '70%',
+
+plugins: {
+
+legend:{
+display:false
+}
+
+}
+
+}
+
+});
+
+}
+
+});
+
+</script>
+
+{% endblock %}

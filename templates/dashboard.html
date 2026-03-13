@@ -1,0 +1,270 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<div class="flex justify-between items-center mb-8">
+
+<h2 class="text-3xl font-bold">
+Welcome, {{ request.user.username }}
+</h2>
+
+<a href="/add-project/" 
+class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700">
++ Add New Project
+</a>
+
+</div>
+
+
+<h3 class="text-xl font-semibold mb-6">
+Your Projects
+</h3>
+
+
+{% if project_data %}
+
+<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+{% for item in project_data %}
+
+<div class="bg-white shadow-md rounded-lg p-6">
+
+<!-- WEBSITE URL -->
+
+<h4 class="text-lg font-semibold mb-4 text-blue-600">
+{{ item.project.website_url }}
+</h4>
+
+
+<!-- PROJECT ACTIONS -->
+
+<div class="flex gap-3 mb-4">
+
+{% if item.latest_report and item.latest_report.status == "Running" %}
+
+<span class="bg-yellow-500 text-white px-3 py-1 rounded text-sm">
+Analyzing...
+</span>
+
+{% else %}
+
+<a href="{% url 'analyze_project' item.project.id %}"
+class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-sm">
+Analyze
+</a>
+
+{% endif %}
+
+
+<a href="{% url 'report_history' item.project.id %}"
+class="bg-gray-700 text-white px-3 py-1 rounded hover:bg-gray-800 text-sm">
+Reports
+</a>
+
+<form action="{% url 'delete_project' item.project.id %}" method="POST">
+
+{% csrf_token %}
+
+<button type="submit"
+class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-sm">
+Delete
+</button>
+
+</form>
+
+</div>
+
+
+<!-- STATUS -->
+
+<p class="text-sm mb-2">
+
+<span class="font-semibold">Status:</span>
+
+<p class="text-sm">
+
+<span class="font-semibold">Status:</span>
+
+<span id="status-{{ item.project.id }}">
+
+{% if item.latest_report and item.latest_report.status == "Running" %}
+
+<span class="text-yellow-600 font-semibold">Crawling...</span>
+
+<div class="w-full bg-gray-200 rounded h-2 mt-1 overflow-hidden">
+
+<div class="bg-yellow-500 h-2 animate-pulse"></div>
+
+</div>
+
+{% elif item.latest_report %}
+
+<span class="text-green-600 font-semibold">
+Completed
+</span>
+
+{% else %}
+
+Not analyzed
+
+{% endif %}
+
+</span>
+
+</p>
+
+{% if item.latest_report %}
+{{ item.latest_report.status }}
+{% else %}
+Not analyzed
+{% endif %}
+
+</span>
+
+</p>
+
+
+<!-- SEO SCORE -->
+
+<div class="mb-3">
+
+<div class="flex items-center justify-between mb-1">
+
+<span class="font-semibold text-sm">SEO Score</span>
+
+{% if item.latest_report %}
+
+<span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-semibold">
+{{ item.latest_report.score }}
+</span>
+
+{% else %}
+
+<span class="text-gray-400 text-xs">
+-
+</span>
+
+{% endif %}
+
+</div>
+
+{% if item.latest_report %}
+
+<div class="w-full bg-gray-200 rounded h-2">
+
+<div
+id="score-{{ item.project.id }}"
+class="bg-green-500 h-2 rounded"
+style="width: {{ item.latest_report.score }}%;">
+</div>
+
+</div>
+
+{% endif %}
+
+</div>
+
+
+<h3 class="text-lg font-semibold mt-6">
+Site Structure
+</h3>
+
+<ul class="text-sm text-gray-600 mt-2">
+
+{% for page in report.crawl_map.splitlines %}
+
+<li class="pl-2 border-l border-gray-300">
+{{ page }}
+</li>
+
+{% endfor %}
+
+</ul>
+
+<!-- PAGES CRAWLED -->
+
+<p class="text-sm">
+
+<span class="font-semibold">Pages Crawled:</span>
+
+<span id="pages-{{ item.project.id }}">
+
+{% if item.latest_report %}
+{{ item.latest_report.pages_crawled }}
+{% else %}
+-
+{% endif %}
+
+</span>
+
+</p>
+
+
+</div>
+
+{% endfor %}
+
+</div>
+
+{% else %}
+
+<div class="bg-white p-6 shadow rounded-lg">
+
+<p class="text-gray-600">
+No projects yet. Click <strong>Add New Project</strong> to start analyzing your website.
+</p>
+
+</div>
+
+{% endif %}
+
+
+
+<script>
+
+function checkStatus(projectId){
+
+fetch(`/status/${projectId}/`)
+.then(response => response.json())
+.then(data => {
+
+let statusEl = document.getElementById(`status-${projectId}`)
+let scoreEl = document.getElementById(`score-${projectId}`)
+let pagesEl = document.getElementById(`pages-${projectId}`)
+
+if(statusEl){
+statusEl.textContent = data.status
+}
+
+if(data.status === "Completed"){
+
+if(scoreEl){
+scoreEl.style.width = data.score + "%"
+}
+
+if(pagesEl){
+pagesEl.textContent = data.pages
+}
+
+}
+
+})
+.catch(error => console.log("Status check error:", error))
+
+}
+
+{% for item in project_data %}
+
+setInterval(function(){
+
+checkStatus({{ item.project.id }})
+
+},3000)
+
+{% endfor %}
+
+</script>
+
+{% endblock %}
