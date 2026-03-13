@@ -1,8 +1,8 @@
 from django.contrib import admin
 from django.urls import path, include
 from analyzer import views
-from django.contrib.auth.views import LogoutView
-from django.contrib.auth.views import LoginView
+from django.contrib.auth.views import LogoutView, LoginView
+from accounts import views as account_views   # <-- ADD THIS
 
 urlpatterns = [
 
@@ -25,7 +25,8 @@ urlpatterns = [
 
     path('logout/', LogoutView.as_view(next_page='home'), name='logout'),
 
+    path('register/', account_views.register_view, name='register'),  # <-- ADD THIS
+
     # APP ROUTES
     path('', include('analyzer.urls')),
-
-]
+]   
