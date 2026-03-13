@@ -23,9 +23,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-n6c4fu3n#!_!$4@(=6in0s767d-)kiwgwr@n-m%-#mmt^*n2m*'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ["seovista.onrender.com",
+    "localhost",
+    "127.0.0.1"
+    ]
 
 
 # Application definition
@@ -142,3 +145,7 @@ import os
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+LOGIN_REDIRECT_URL = "dashboard"
+LOGOUT_REDIRECT_URL = "home"
+LOGIN_URL = "login"
