@@ -3,7 +3,7 @@
 
 <head>
 
-<title>H1 Screenshots</title>
+<title>SEOVista | H1 Screenshots</title>
 
 <style>
 
@@ -11,12 +11,15 @@ body{
 font-family: Arial, sans-serif;
 margin: 0;
 padding: 0;
+background: #f5f7fb;
 }
 
 /* PAGE CONTAINER */
 
 .container{
 padding: 80px 40px;
+max-width: 1200px;
+margin: auto;
 }
 
 /* FLOATING DASHBOARD BUTTON */
@@ -46,37 +49,79 @@ z-index: 999;
 background-color: #1a5edb;
 }
 
+/* PAGE TITLE */
+
+h2{
+margin-bottom: 30px;
+color: #222;
+}
+
 /* SCREENSHOT CARD */
 
 .screenshot-box{
 
-margin-bottom: 60px;
-
+margin-bottom: 50px;
 padding: 20px;
 
-border: 1px solid #ddd;
+background: white;
 
-border-radius: 8px;
+border-radius: 10px;
 
-box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 
+transition: transform 0.2s ease;
 }
+
+.screenshot-box:hover{
+transform: translateY(-3px);
+}
+
+/* IMAGE */
 
 .screenshot-box img{
 
 width: 100%;
 max-width: 1000px;
 
-border-radius: 6px;
+border-radius: 8px;
 
-margin-top: 10px;
+margin-top: 12px;
 
+border: 1px solid #eee;
 }
+
+/* URL TITLE */
 
 .url-title{
 font-weight: bold;
-font-size: 16px;
-color: #333;
+font-size: 15px;
+color: #444;
+word-break: break-all;
+}
+
+/* EMPTY STATE */
+
+.empty{
+text-align: center;
+color: #777;
+margin-top: 100px;
+}
+
+/* LOADING PLACEHOLDER */
+
+.loader{
+width: 100%;
+height: 300px;
+background: linear-gradient(90deg,#eee,#f5f5f5,#eee);
+background-size: 200% 100%;
+animation: shimmer 1.5s infinite;
+border-radius: 8px;
+margin-top: 10px;
+}
+
+@keyframes shimmer{
+0%{background-position: -200% 0;}
+100%{background-position: 200% 0;}
 }
 
 </style>
@@ -88,12 +133,12 @@ color: #333;
 
 <!-- FLOATING DASHBOARD BUTTON -->
 
-<a class="dashboard-btn" href="/dashboard/">⬅ Back to Dashboard</a>
+<a class="dashboard-btn" href="/dashboard/">⬅ Dashboard</a>
 
 
 <div class="container">
 
-<h2>H1 Screenshots</h2>
+<h2>📸 H1 Screenshots</h2>
 
 {% if screenshots %}
 
@@ -102,12 +147,20 @@ color: #333;
 <div class="screenshot-box">
 
 <div class="url-title">
-
-{{ shot.url }}
-
+🔗 {{ shot.url }}
 </div>
 
-<img src="data:image/png;base64,{{ shot.image }}">
+<!-- 🔥 FIX: SUPPORT BOTH BASE64 + URL -->
+
+{% if shot.image|slice:":4" == "http" %}
+
+<img src="{{ shot.image }}" alt="Screenshot">
+
+{% else %}
+
+<img src="data:image/png;base64,{{ shot.image }}" alt="Screenshot">
+
+{% endif %}
 
 </div>
 
@@ -115,7 +168,10 @@ color: #333;
 
 {% else %}
 
-<p>No screenshots available.</p>
+<div class="empty">
+<h3>No screenshots available</h3>
+<p>Try running analysis again.</p>
+</div>
 
 {% endif %}
 

@@ -106,16 +106,21 @@ def delete_project(request, project_id):
 
 
 # ---------------------------------------------------
-# GENERATE SCREENSHOT
+# GENERATE SCREENSHOT (FIXED + FALLBACK)
 # ---------------------------------------------------
 
 def generate_screenshot(url):
 
     try:
-
         with sync_playwright() as p:
 
-            browser = p.chromium.launch(headless=True)
+            browser = p.chromium.launch(
+                headless=True,
+                args=[
+                    "--no-sandbox",
+                    "--disable-dev-shm-usage"
+                ]
+            )
 
             page = browser.new_page()
 
@@ -131,10 +136,14 @@ def generate_screenshot(url):
 
     except Exception as e:
 
-        print("Screenshot error:", e)
+        print("Playwright screenshot failed:", e)
 
-        return None
-
+        # 🔥 FALLBACK (100% reliable)
+        try:
+            fallback_url = f"https://image.thum.io/get/fullpage/{url}"
+            return fallback_url  # return URL instead of base64
+        except:
+            return None
 
 # ---------------------------------------------------
 # BACKGROUND CRAWLER
