@@ -154,5 +154,9 @@ CSRF_TRUSTED_ORIGINS = [
     "https://seovista.onrender.com"
 ]
 
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
