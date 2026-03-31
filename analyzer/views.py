@@ -110,38 +110,56 @@ def delete_project(request, project_id):
 # ---------------------------------------------------
 
 def generate_screenshot(url):
-
     try:
+        print("Starting Playwright...")
+
         with sync_playwright() as p:
 
             browser = p.chromium.launch(
                 headless=True,
                 args=[
                     "--no-sandbox",
-                    "--disable-dev-shm-usage"
+                    "--disable-dev-shm-usage",
+                    "--disable-gpu",
+                    "--single-process"
                 ]
             )
 
-            page = browser.new_page()
+            page = browser.new_page(
+                viewport={"width": 1280, "height": 720}
+            )
 
-            page.goto(url, timeout=60000)
+            print("Opening URL:", url)
 
-            screenshot_bytes = page.screenshot(full_page=True)
+            page.goto(
+                url,
+                timeout=60000,
+                wait_until="networkidle"
+            )
+
+            print("Taking screenshot...")
+
+            screenshot_bytes = page.screenshot(
+                full_page=True
+            )
 
             browser.close()
 
             encoded = base64.b64encode(screenshot_bytes).decode()
 
+            print("Screenshot success ✅")
+
             return encoded
 
     except Exception as e:
 
-        print("Playwright screenshot failed:", e)
+        print("❌ Playwright screenshot failed:", str(e))
 
-        # 🔥 FALLBACK (100% reliable)
+        # 🔥 FALLBACK (very important for Render)
         try:
             fallback_url = f"https://image.thum.io/get/fullpage/{url}"
-            return fallback_url  # return URL instead of base64
+            print("Using fallback screenshot:", fallback_url)
+            return fallback_url
         except:
             return None
 
