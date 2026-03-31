@@ -7,20 +7,17 @@ from django.contrib.auth.decorators import login_required
 from projects.models import Project
 from analyzer.models import SEOReport
 
-
-# ---------------------------------------------------
-# REGISTER
-# ---------------------------------------------------
+#--------------------------------------------------
+#REGISTER
+#--------------------------------------------------
 
 def register_view(request):
-
     if request.method == 'POST':
-
         username = request.POST.get('username')
         email = request.POST.get('email')
         password = request.POST.get('password')
 
-        # 🔒 Validation
+        # Validation
         if not username or not password:
             messages.error(request, "All fields are required")
             return redirect('register')
@@ -29,35 +26,35 @@ def register_view(request):
             messages.error(request, "Username already exists")
             return redirect('register')
 
-        # ✅ Create user
+        # Create user
         user = User.objects.create_user(
             username=username,
             email=email,
             password=password
         )
 
-        messages.success(request, "Account created successfully. Please login.")
-        return redirect('login')
+        # Auto login after registration
+        login(request, user)
+        request.session.set_expiry(1209600)  # 2 weeks
+
+        messages.success(request, "Account created successfully!")
+        return redirect('dashboard')
 
     return render(request, 'register.html')
 
-
-# ---------------------------------------------------
-# LOGIN (FIXED)
-# ---------------------------------------------------
+#---------------------------------------------------
+#LOGIN (WITH REMEMBER ME)
+#---------------------------------------------------
 
 def login_view(request):
-
-    # ✅ If already logged in → skip login page
     if request.user.is_authenticated:
         return redirect('dashboard')
 
     if request.method == 'POST':
-
         username = request.POST.get('username')
         password = request.POST.get('password')
+        remember_me = request.POST.get('remember_me')
 
-        # 🔒 Safety check
         if not username or not password:
             messages.error(request, "Please enter username and password")
             return redirect('login')
@@ -67,32 +64,29 @@ def login_view(request):
         if user is not None:
             login(request, user)
 
-            # 🔥 IMPORTANT (ensures session works)
-            request.session.set_expiry(86400)  # 1 day session
+            # Remember Me logic
+            if remember_me:
+                request.session.set_expiry(1209600)  # 2 weeks
+            else:
+                request.session.set_expiry(0)  # logout on browser close
 
             messages.success(request, "Login successful")
             return redirect('dashboard')
-
         else:
             messages.error(request, "Invalid username or password")
             return redirect('login')
 
     return render(request, 'login.html')
 
+#---------------------------------------------------
+#LOGOUT
+#---------------------------------------------------
 
-# ---------------------------------------------------
-# LOGOUT (SAFE)
-# ---------------------------------------------------
-
+@login_required
 def logout_view(request):
-
-    if request.method == "POST":
-        logout(request)
-        messages.success(request, "Logged out successfully")
-        return redirect('login')
-
-    return redirect('dashboard')
-
+    logout(request)
+    messages.success(request, "Logged out successfully")
+    return redirect('login')
 
 # ---------------------------------------------------
 # DASHBOARD
@@ -100,13 +94,10 @@ def logout_view(request):
 
 @login_required
 def dashboard_view(request):
-
     projects = Project.objects.filter(user=request.user)
-
     project_data = []
 
     for project in projects:
-
         latest_report = SEOReport.objects.filter(
             project=project
         ).order_by('-id').first()
