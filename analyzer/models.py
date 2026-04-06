@@ -28,6 +28,8 @@ class SEOReport(models.Model):
     crawl_map = models.TextField(blank=True, null=True)
 
     screenshot = models.TextField(null=True, blank=True)
+    
+    suggestions = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.project.website_url} - {self.status}"

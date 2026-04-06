@@ -13,7 +13,7 @@ Welcome, {{ request.user.username }}
 </h2>
 
 <a href="/add-project/" 
-class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700">
+class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition">
 + Add New Project
 </a>
 
@@ -35,42 +35,42 @@ Your Projects
 
 <!-- ================= PROJECT CARD ================= -->
 
-<div class="bg-white shadow-md rounded-lg p-6">
+<div class="bg-white shadow-xl rounded-2xl p-6 border border-gray-100 hover:shadow-2xl transition duration-300">
 
 <!-- WEBSITE URL -->
 
-<h4 class="text-lg font-semibold mb-4 text-blue-600">
+<h4 class="text-lg font-semibold mb-4 text-blue-600 break-words">
 {{ item.project.website_url }}
 </h4>
 
 <!-- ================= ACTION BUTTONS ================= -->
 
-<div class="flex gap-3 mb-4">
+<div class="flex gap-3 mb-4 flex-wrap">
 
 {% if item.latest_report and item.latest_report.status == "Running" %}
 
-<span class="bg-yellow-500 text-white px-3 py-1 rounded text-sm">
+<span class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs font-semibold">
 Analyzing...
 </span>
 
 {% else %}
 
 <a href="{% url 'analyze_project' item.project.id %}"
-class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-sm">
+class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-sm transition">
 Analyze
 </a>
 
 {% endif %}
 
 <a href="{% url 'report_history' item.project.id %}"
-class="bg-gray-700 text-white px-3 py-1 rounded hover:bg-gray-800 text-sm">
+class="bg-gray-700 text-white px-3 py-1 rounded hover:bg-gray-800 text-sm transition">
 Reports
 </a>
 
 <form action="{% url 'delete_project' item.project.id %}" method="POST">
 {% csrf_token %}
 <button type="submit"
-class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-sm">
+class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-sm transition">
 Delete
 </button>
 </form>
@@ -79,20 +79,30 @@ Delete
 
 <!-- ================= STATUS ================= -->
 
-<p class="text-sm mb-2">
+<p class="text-sm mb-3">
 
 <strong>Status:</strong>
 
 <span id="status-{{ item.project.id }}">
 
 {% if item.latest_report and item.latest_report.status == "Running" %}
-<span class="text-yellow-600 font-semibold">Crawling...</span>
+
+<span class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs font-semibold">
+Crawling...
+</span>
 
 {% elif item.latest_report %}
-<span class="text-green-600 font-semibold">Completed</span>
+
+<span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold">
+Completed
+</span>
 
 {% else %}
+
+<span class="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-semibold">
 Not analyzed
+</span>
+
 {% endif %}
 
 </span>
@@ -101,14 +111,14 @@ Not analyzed
 
 <!-- ================= SEO SCORE ================= -->
 
-<div class="mb-3">
+<div class="mb-4">
 
 <div class="flex justify-between text-sm mb-1">
 
-<span>SEO Score</span>
+<span class="font-medium">SEO Score</span>
 
 {% if item.latest_report %}
-<span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs">
+<span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-semibold">
 {{ item.latest_report.score }}
 </span>
 {% else %}
@@ -118,8 +128,8 @@ Not analyzed
 </div>
 
 {% if item.latest_report %}
-<div class="w-full bg-gray-200 rounded h-2">
-<div class="bg-green-500 h-2 rounded"
+<div class="w-full bg-gray-200 rounded-full h-3">
+<div class="bg-gradient-to-r from-green-400 to-green-600 h-3 rounded-full"
 style="width: {{ item.latest_report.score }}%;">
 </div>
 </div>
@@ -129,7 +139,7 @@ style="width: {{ item.latest_report.score }}%;">
 
 <!-- ================= PAGES CRAWLED ================= -->
 
-<p class="text-sm">
+<p class="text-sm mb-2">
 
 <strong>Pages Crawled:</strong>
 
@@ -143,7 +153,7 @@ style="width: {{ item.latest_report.score }}%;">
 
 </p>
 
-<!-- ================= H1 COUNT (CLICKABLE SCREENSHOT) ================= -->
+<!-- ================= H1 COUNT ================= -->
 
 <p class="text-sm mt-2">
 
@@ -153,9 +163,8 @@ style="width: {{ item.latest_report.score }}%;">
 
     {% if item.latest_report.screenshot %}
 
-        <!-- 🔥 CLICKABLE LINK -->
         <a href="{{ item.latest_report.screenshot }}" target="_blank"
-           class="text-blue-600 font-semibold hover:underline">
+           class="inline-block bg-blue-100 text-blue-700 px-2 py-1 rounded-md text-xs font-semibold hover:bg-blue-200 transition">
 
             {{ item.latest_report.h1_count }}
 
@@ -175,6 +184,28 @@ style="width: {{ item.latest_report.score }}%;">
 
 </p>
 
+<!-- ================= SEO SUGGESTIONS ================= -->
+
+{% if item.latest_report and item.latest_report.suggestions %}
+
+<div class="mt-4 bg-gray-50 p-4 rounded-xl border border-gray-200">
+
+<p class="font-semibold text-sm mb-2 text-gray-700">
+SEO Suggestions
+</p>
+
+<ul class="text-xs text-gray-600 space-y-1">
+
+{% for suggestion in item.latest_report.suggestions.splitlines %}
+<li>• {{ suggestion }}</li>
+{% endfor %}
+
+</ul>
+
+</div>
+
+{% endif %}
+
 </div>
 
 {% endfor %}
@@ -185,8 +216,10 @@ style="width: {{ item.latest_report.score }}%;">
 
 <!-- ================= EMPTY STATE ================= -->
 
-<div class="bg-white p-6 shadow rounded-lg">
-<p>No projects yet. Add one to start.</p>
+<div class="bg-white p-6 shadow rounded-lg text-center">
+<p class="text-gray-600">
+No projects yet. Click <strong>Add New Project</strong> to start analyzing.
+</p>
 </div>
 
 {% endif %}

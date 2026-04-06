@@ -19,6 +19,8 @@ import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
+# ================= BASIC PAGES =================
+
 def home(request):
     return render(request, "home.html")
 
@@ -26,6 +28,8 @@ def home(request):
 def about(request):
     return render(request, "about.html")
 
+
+# ================= DASHBOARD =================
 
 @login_required
 def dashboard(request):
@@ -41,6 +45,8 @@ def dashboard(request):
 
     return render(request, "dashboard.html", {"project_data": project_data})
 
+
+# ================= ADD PROJECT =================
 
 @login_required
 def add_project(request):
@@ -58,12 +64,16 @@ def add_project(request):
     return render(request, "add_project.html")
 
 
+# ================= DELETE PROJECT =================
+
 @login_required
 def delete_project(request, project_id):
     project = get_object_or_404(Project, id=project_id, user=request.user)
     project.delete()
     return redirect("dashboard")
 
+
+# ================= REPORT HISTORY =================
 
 @login_required
 def report_history(request, project_id):
@@ -76,10 +86,13 @@ def report_history(request, project_id):
     })
 
 
-# 🔥 SIMPLE + WORKING SCREENSHOT (NO PLAYWRIGHT)
+# ================= SCREENSHOT =================
+
 def generate_screenshot(url):
     return f"https://image.thum.io/get/fullpage/{url}"
 
+
+# ================= CRAWLER =================
 
 def run_crawler(project_id, report_id):
     close_old_connections()
@@ -114,13 +127,18 @@ def run_crawler(project_id, report_id):
 
             soup = BeautifulSoup(res.text, "html.parser")
 
+            # TITLE CHECK
             if not soup.find("title"):
                 issues.append(f"Missing title on {url}")
 
+            # META DESCRIPTION CHECK
             if not soup.find("meta", attrs={"name": "description"}):
                 issues.append(f"Missing meta description on {url}")
 
+            # H1 COUNT
             h1_count += len(soup.find_all("h1"))
+
+            # IMAGE ALT CHECK
             missing_alt += len([img for img in soup.find_all("img") if not img.get("alt")])
 
             crawl_map.append(url)
@@ -134,6 +152,8 @@ def run_crawler(project_id, report_id):
 
             return links
 
+        # ================= CRAWLING =================
+
         while to_visit and pages < 10:
             url = to_visit.pop(0)
 
@@ -145,21 +165,50 @@ def run_crawler(project_id, report_id):
                     if link not in visited:
                         to_visit.append(link)
 
+        # ================= SEO SCORE =================
+
         score = 100
+
         if missing_alt > 0:
             score -= min(missing_alt, 30)
+
         if h1_count == 0:
             score -= 20
 
-        # 🔥 SAVE SCREENSHOT
-        report.screenshot = generate_screenshot(base_url)
+        score = max(0, min(score, 100))
 
+        # ================= SEO SUGGESTIONS =================
+
+        suggestions = []
+
+        if h1_count == 0:
+            suggestions.append("Add at least one H1 tag to improve SEO structure.")
+
+        elif h1_count > 1:
+            suggestions.append("Use only one H1 tag per page for better SEO hierarchy.")
+
+        if missing_alt > 0:
+            suggestions.append("Add alt attributes to all images for better accessibility and SEO.")
+
+        if pages < 5:
+            suggestions.append("Increase internal linking to improve crawl depth.")
+
+        if score < 50:
+            suggestions.append("Your SEO score is low. Improve meta tags, headings, and content.")
+
+        elif score >= 80:
+            suggestions.append("Great job! Your website is well optimized.")
+
+        # ================= SAVE REPORT =================
+
+        report.screenshot = generate_screenshot(base_url)
         report.h1_count = h1_count
         report.missing_alt_count = missing_alt
         report.pages_crawled = pages
-        report.score = max(0, min(score, 100))
+        report.score = score
         report.issues = "\n".join(set(issues))
         report.crawl_map = "\n".join(crawl_map)
+        report.suggestions = "\n".join(suggestions)  # 🔥 NEW FIELD
         report.status = "Completed"
 
         report.save()
@@ -167,6 +216,8 @@ def run_crawler(project_id, report_id):
     except Exception as e:
         print("Crawler error:", e)
 
+
+# ================= START ANALYSIS =================
 
 @login_required
 def analyze_project(request, project_id):
@@ -185,6 +236,8 @@ def analyze_project(request, project_id):
     return redirect("dashboard")
 
 
+# ================= STATUS CHECK =================
+
 @login_required
 def check_report_status(request, project_id):
     report = SEOReport.objects.filter(project_id=project_id).order_by("-id").first()
@@ -198,6 +251,8 @@ def check_report_status(request, project_id):
         "pages": report.pages_crawled
     })
 
+
+# ================= CONTACT =================
 
 def contact_view(request):
     if request.method == "POST":
